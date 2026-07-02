@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ApiError, api } from "../api/client";
 import type { CompanyPayload, DcfInputs, DcfResult, MarketData } from "../api/types";
@@ -74,6 +74,7 @@ export function Company() {
   const [running, setRunning] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedId, setSavedId] = useState<number | null>(null);
+  const hasRunRef = useRef(false);
 
   const load = useCallback(
     async (refresh: boolean) => {
@@ -81,6 +82,7 @@ export function Company() {
       setLoadError(null);
       setResult(null);
       setSavedId(null);
+      hasRunRef.current = false;
       try {
         const [companyData, marketData] = await Promise.all([
           api.company(ticker, refresh),
@@ -119,6 +121,7 @@ export function Company() {
     setSavedId(null);
     try {
       setResult(await api.runDcf(inputs as DcfInputs));
+      hasRunRef.current = true;
     } catch (e) {
       setResult(null);
       setRunError(e instanceof ApiError ? e.message : String(e));
@@ -126,6 +129,14 @@ export function Company() {
       setRunning(false);
     }
   };
+
+  // After the first run, re-run automatically (debounced) as assumptions change
+  useEffect(() => {
+    if (!hasRunRef.current || missing.length > 0) return;
+    const id = setTimeout(() => void run(), 600);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputs]);
 
   const save = async () => {
     if (!company || !result) return;
@@ -208,6 +219,7 @@ export function Company() {
           onSave={() => void save()}
           saving={saving}
           savedId={savedId}
+          recalculating={running}
         />
       )}
     </>

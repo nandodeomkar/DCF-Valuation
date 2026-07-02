@@ -47,7 +47,7 @@ export function Fundamentals({ company }: { company: CompanyPayload }) {
       {chartData.length > 1 && (
         <ResponsiveContainer width="100%" height={220}>
           <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid stroke="#eceef1" vertical={false} />
+            <CartesianGrid stroke="var(--border)" vertical={false} />
             <XAxis dataKey="year" tick={{ fontSize: 12 }} />
             <YAxis
               yAxisId="rev"
@@ -61,20 +61,34 @@ export function Fundamentals({ company }: { company: CompanyPayload }) {
               tickFormatter={(v: number) => `${v.toFixed(0)}%`}
             />
             <Tooltip
+              contentStyle={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 8,
+                color: "var(--text)",
+              }}
               formatter={(value, name) =>
                 name === "Revenue ($B)"
                   ? [`$${Number(value).toFixed(1)}B`, "Revenue"]
                   : [`${Number(value).toFixed(1)}%`, "Op margin"]
               }
             />
-            <Bar yAxisId="rev" dataKey="revenueB" name="Revenue ($B)" fill="#a8c3e8" />
+            <Bar
+              yAxisId="rev"
+              dataKey="revenueB"
+              name="Revenue ($B)"
+              fill="var(--chart-bar)"
+              radius={[3, 3, 0, 0]}
+              animationDuration={700}
+            />
             <Line
               yAxisId="margin"
               dataKey="margin"
               name="Op margin (%)"
-              stroke="#1f4e8c"
+              stroke="var(--chart-line)"
               strokeWidth={2}
               dot={false}
+              animationDuration={900}
             />
           </ComposedChart>
         </ResponsiveContainer>

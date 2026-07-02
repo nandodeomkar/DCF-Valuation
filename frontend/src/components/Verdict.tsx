@@ -1,5 +1,6 @@
 import type { DcfResult } from "../api/types";
 import { money, pct, price, signedPct } from "../format";
+import { useCountUp } from "../hooks";
 import { Banners } from "./Banners";
 
 interface Props {
@@ -8,20 +9,34 @@ interface Props {
   onSave: () => void;
   saving: boolean;
   savedId: number | null;
+  recalculating?: boolean;
 }
 
-export function Verdict({ result, currentPrice, onSave, saving, savedId }: Props) {
+/** Heatmap color for a sensitivity cell: green above market price, red below. */
+function heatColor(cell: number | null, marketPrice: number | null, center: number): string {
+  const reference = marketPrice ?? center;
+  if (cell == null || reference <= 0) return "transparent";
+  const ratio = cell / reference - 1;
+  const intensity = Math.min(Math.abs(ratio) / 0.6, 1) * 0.32;
+  return ratio >= 0
+    ? `rgba(34, 197, 94, ${intensity.toFixed(3)})`
+    : `rgba(239, 68, 68, ${intensity.toFixed(3)})`;
+}
+
+export function Verdict({ result, currentPrice, onSave, saving, savedId, recalculating }: Props) {
   const upside = result.upside;
+  const animatedIntrinsic = useCountUp(result.intrinsic_per_share);
+  const maxPv = Math.max(...result.years.map((y) => Math.abs(y.pv)), 1);
 
   return (
-    <div className="card">
+    <div className={`card fade-up${recalculating ? " recalculating" : ""}`}>
       <div className="section-label">3 · Verdict</div>
       <Banners warnings={result.warnings} />
 
       <div className="verdict">
         <div>
           <div className="muted">Intrinsic value / share</div>
-          <div className="big">{price(result.intrinsic_per_share)}</div>
+          <div className="big">{price(animatedIntrinsic)}</div>
         </div>
         <div>
           <div className="muted">Market price</div>
@@ -77,7 +92,7 @@ export function Verdict({ result, currentPrice, onSave, saving, savedId }: Props
               <th>NOPAT</th>
               <th>Reinvest</th>
               <th>FCFF</th>
-              <th>PV</th>
+              <th style={{ textAlign: "left" }}>PV</th>
             </tr>
           </thead>
           <tbody>
@@ -91,7 +106,13 @@ export function Verdict({ result, currentPrice, onSave, saving, savedId }: Props
                 <td className="num">{money(y.nopat)}</td>
                 <td className="num">{money(y.reinvestment)}</td>
                 <td className="num">{money(y.fcff)}</td>
-                <td className="num">{money(y.pv)}</td>
+                <td className="num" style={{ textAlign: "left" }}>
+                  <span
+                    className="pv-bar"
+                    style={{ width: `${Math.max((Math.abs(y.pv) / maxPv) * 60, 2)}px` }}
+                  />
+                  {money(y.pv)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -99,7 +120,10 @@ export function Verdict({ result, currentPrice, onSave, saving, savedId }: Props
       </div>
 
       <h2 style={{ marginTop: 20 }}>Sensitivity — value per share</h2>
-      <p className="muted">Rows: WACC. Columns: terminal growth. Outlined cell = your base case.</p>
+      <p className="muted">
+        Rows: WACC. Columns: terminal growth. Green = above market price, red = below. Outlined
+        cell = your base case.
+      </p>
       <div style={{ overflowX: "auto" }}>
         <table className="sens">
           <thead>
@@ -115,7 +139,14 @@ export function Verdict({ result, currentPrice, onSave, saving, savedId }: Props
               <tr key={result.sensitivity.wacc_values[i]}>
                 <td className="num">{pct(result.sensitivity.wacc_values[i], 2)}</td>
                 {row.map((cell, j) => (
-                  <td key={j} className={i === 2 && j === 2 ? "center-cell" : ""}>
+                  <td
+                    key={j}
+                    className={`heat${i === 2 && j === 2 ? " center-cell" : ""}`}
+                    style={{
+                      backgroundColor: heatColor(cell, currentPrice, result.intrinsic_per_share),
+                    }}
+                    title={cell == null ? "undefined (WACC ≤ g)" : price(cell)}
+                  >
                     {cell == null ? "—" : price(cell)}
                   </td>
                 ))}

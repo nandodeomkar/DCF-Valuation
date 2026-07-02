@@ -12,7 +12,37 @@
   --red-soft: #faeae8;
   --amber: #8a6d1a;
   --amber-soft: #faf3dc;
+  --amber-border: #e8d9a8;
+  --red-border: #ecc7c3;
+  --chart-bar: #a8c3e8;
+  --chart-line: #1f4e8c;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-hover: 0 6px 20px rgba(16, 24, 40, 0.08);
   --mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #0e1320;
+  --surface: #161d2e;
+  --border: #27304a;
+  --text: #e7ebf4;
+  --text-muted: #93a0b6;
+  --accent: #6ea8ff;
+  --accent-soft: rgba(110, 168, 255, 0.14);
+  --green: #4ade80;
+  --green-soft: rgba(74, 222, 128, 0.13);
+  --red: #f8827a;
+  --red-soft: rgba(248, 130, 122, 0.14);
+  --amber: #fbca4e;
+  --amber-soft: rgba(251, 202, 78, 0.12);
+  --amber-border: rgba(251, 202, 78, 0.35);
+  --red-border: rgba(248, 130, 122, 0.35);
+  --chart-bar: #31456b;
+  --chart-line: #6ea8ff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
 }
 
 * {
@@ -26,6 +56,7 @@ body {
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 15px;
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -68,6 +99,12 @@ h2 {
   color: var(--text);
 }
 
+.topbar .actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .search {
   display: flex;
   gap: 8px;
@@ -86,11 +123,13 @@ select {
   border-radius: 6px;
   background: var(--surface);
   color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
 }
 
 input:focus {
-  outline: 2px solid var(--accent-soft);
+  outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 button {
@@ -100,12 +139,23 @@ button {
   border: 1px solid var(--accent);
   border-radius: 6px;
   background: var(--accent);
-  color: #fff;
+  color: var(--surface);
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
-button:hover {
-  filter: brightness(1.1);
+[data-theme="dark"] button {
+  color: #0e1320;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 button:disabled {
@@ -126,12 +176,28 @@ button.danger {
   font-size: 13px;
 }
 
+button.icon-btn {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 15px;
+  line-height: 1;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 20px 24px;
   margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
 }
 
 .section-label {
@@ -153,18 +219,19 @@ button.danger {
   padding: 10px 14px;
   margin-bottom: 12px;
   font-size: 14px;
+  animation: fade-up 0.35s ease both;
 }
 
 .banner.warn {
   background: var(--amber-soft);
   color: var(--amber);
-  border: 1px solid #e8d9a8;
+  border: 1px solid var(--amber-border);
 }
 
 .banner.error {
   background: var(--red-soft);
   color: var(--red);
-  border: 1px solid #ecc7c3;
+  border: 1px solid var(--red-border);
 }
 
 table {
@@ -197,6 +264,14 @@ td.num {
   font-size: 12.5px;
 }
 
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+  background: var(--accent-soft);
+}
+
 /* Company header */
 .company-header {
   display: flex;
@@ -226,6 +301,12 @@ td.num {
   gap: 12px;
   padding: 6px 0;
   border-bottom: 1px dashed var(--border);
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.assumption:focus-within {
+  background: var(--accent-soft);
 }
 
 .assumption .label {
@@ -250,9 +331,14 @@ td.num {
 .assumption input.missing {
   border-color: var(--amber);
   background: var(--amber-soft);
+  animation: pulse-border 1.6s ease-in-out infinite;
 }
 
 /* Verdict */
+.fade-up {
+  animation: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .verdict {
   display: flex;
   gap: 28px;
@@ -264,6 +350,12 @@ td.num {
   font-family: var(--mono);
   font-size: 34px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.recalculating {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
 }
 
 .badge {
@@ -272,6 +364,7 @@ td.num {
   border-radius: 999px;
   font-weight: 700;
   font-size: 15px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .badge.up {
@@ -297,6 +390,21 @@ td.num {
   border: 1px solid var(--border);
   border-right: none;
   background: var(--bg);
+  transition: background-color 0.2s ease;
+  animation: fade-up 0.4s ease both;
+}
+
+.bridge .step:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.bridge .step:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.bridge .step:nth-child(4) {
+  animation-delay: 0.18s;
+}
+.bridge .step:nth-child(5) {
+  animation-delay: 0.24s;
 }
 
 .bridge .step:first-child {
@@ -316,11 +424,28 @@ td.num {
   font-weight: 600;
 }
 
+/* PV mini bars in FCFF table */
+.pv-bar {
+  display: inline-block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--chart-line);
+  vertical-align: middle;
+  margin-right: 6px;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Sensitivity */
 .sens td {
   font-family: var(--mono);
   font-size: 12.5px;
   text-align: center;
+  transition: transform 0.12s ease;
+}
+
+.sens td.heat:hover {
+  transform: scale(1.12);
+  font-weight: 700;
 }
 
 .sens td.center-cell {
@@ -332,10 +457,52 @@ td.num {
 .spinner {
   color: var(--text-muted);
   padding: 24px 0;
+  animation: pulse-opacity 1.4s ease-in-out infinite;
 }
 
 .footer-note {
   margin-top: 32px;
   font-size: 12.5px;
   color: var(--text-muted);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-border {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--amber-soft);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--amber-soft);
+  }
+}
+
+@keyframes pulse-opacity {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
