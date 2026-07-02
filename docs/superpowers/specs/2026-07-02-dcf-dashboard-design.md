@@ -58,12 +58,12 @@ Key principles:
 
 ## UI
 
-**Home page:** list of saved valuations (company, date, intrinsic value vs. price then and now) plus a ticker search box.
+**Home page:** list of saved valuations (company, date, intrinsic value, price at time of run, and current price — fetched live when the page loads) plus a ticker search box.
 
 **Company page — "Analyst narrative" layout**, a vertical scroll in three sections mirroring how an analyst reasons:
 
 1. **What EDGAR says** — 10-year fundamentals table and revenue/margin charts. Pure fetched data.
-2. **Your assumptions** — each input (growth, margin, WACC components, terminal growth, sales-to-capital) rendered beside its historical anchor (e.g. revenue growth input next to 1/5/10-year CAGRs). Pre-filled with history-derived defaults.
+2. **Your assumptions** — each input (growth, margin, tax rate, WACC components, terminal growth, sales-to-capital) rendered beside its historical anchor (e.g. revenue growth input next to 1/5/10-year CAGRs). Pre-filled with history-derived defaults.
 3. **Verdict** — intrinsic value per share vs. market price with upside/downside %, per-year FCFF projection table, EV→equity bridge, and sensitivity grid. Save button persists the full run.
 
 ## Data Flow
