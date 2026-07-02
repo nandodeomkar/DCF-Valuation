@@ -1,0 +1,21 @@
+# Brainstorming session artifacts
+.superpowers/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# Local data
+*.sqlite3
+*.db
+backend/data/cache/
+
+# Env
+.env
