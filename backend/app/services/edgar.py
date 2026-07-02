@@ -27,7 +27,11 @@ FACTS_TTL = DAY
 
 
 class EdgarError(Exception):
-    """Raised when EDGAR data cannot be fetched or the ticker is unknown."""
+    """Raised when EDGAR data cannot be fetched."""
+
+
+class TickerNotFoundError(EdgarError):
+    """Raised when a ticker is not in the SEC company list."""
 
 
 def _cached_get(url: str, cache_name: str, ttl: float, force_refresh: bool = False) -> dict:
@@ -38,7 +42,7 @@ def _cached_get(url: str, cache_name: str, ttl: float, force_refresh: bool = Fal
         if age < ttl:
             return json.loads(cache_file.read_text(encoding="utf-8"))
     try:
-        response = httpx.get(url, headers=HEADERS, timeout=30, follow_redirects=True)
+        response = httpx.get(url, headers=HEADERS, timeout=60, follow_redirects=True)
         response.raise_for_status()
     except httpx.HTTPError as exc:
         # Serve stale cache if the network is down but we have something
@@ -57,7 +61,7 @@ def resolve_cik(ticker: str, force_refresh: bool = False) -> str:
     for entry in mapping.values():
         if entry["ticker"].upper() == ticker:
             return f"{entry['cik_str']:010d}"
-    raise EdgarError(f"Ticker '{ticker}' not found in SEC company list")
+    raise TickerNotFoundError(f"Ticker '{ticker}' not found in SEC company list")
 
 
 def get_company_facts(cik: str, force_refresh: bool = False) -> dict:

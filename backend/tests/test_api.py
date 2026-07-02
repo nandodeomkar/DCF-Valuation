@@ -52,7 +52,7 @@ class TestCompanyEndpoint:
 
     def test_unknown_ticker_404(self, monkeypatch):
         def boom(t, force_refresh=False):
-            raise edgar.EdgarError(f"Ticker '{t.upper()}' not found in SEC company list")
+            raise edgar.TickerNotFoundError(f"Ticker '{t.upper()}' not found in SEC company list")
 
         monkeypatch.setattr(edgar, "resolve_cik", boom)
         response = client.get("/api/company/zzzz")
