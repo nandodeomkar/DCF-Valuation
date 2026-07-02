@@ -92,6 +92,60 @@ class DcfResult(BaseModel):
     warnings: list[str] = []
 
 
+class FiscalYearData(BaseModel):
+    """One fiscal year of normalized fundamentals. None = not reported/extractable."""
+
+    fiscal_year: int
+    end_date: str
+    revenue: float | None = None
+    operating_income: float | None = None
+    depreciation_amortization: float | None = None
+    capex: float | None = None
+    working_capital: float | None = None
+    pretax_income: float | None = None
+    tax_expense: float | None = None
+    total_debt: float | None = None
+    cash: float | None = None
+    diluted_shares: float | None = None
+
+
+class DerivedMetrics(BaseModel):
+    """History-derived anchors used to pre-fill assumption inputs."""
+
+    latest_revenue: float | None = None
+    latest_operating_margin: float | None = None
+    avg_operating_margin_5y: float | None = None
+    revenue_cagr_1y: float | None = None
+    revenue_cagr_5y: float | None = None
+    revenue_cagr_10y: float | None = None
+    effective_tax_rate: float | None = None
+    sales_to_capital_5y: float | None = None
+    latest_total_debt: float | None = None
+    latest_cash: float | None = None
+    latest_diluted_shares: float | None = None
+
+
+class CompanyPayload(BaseModel):
+    ticker: str
+    cik: str
+    company_name: str
+    sic: str | None = None
+    sic_description: str | None = None
+    is_financial: bool = False
+    years: list[FiscalYearData]
+    derived: DerivedMetrics
+    warnings: list[str] = []
+
+
+class MarketData(BaseModel):
+    ticker: str
+    price: float | None = None
+    beta: float | None = None
+    market_cap: float | None = None
+    risk_free: float | None = None
+    warnings: list[str] = []
+
+
 class SavedValuation(BaseModel):
     id: int | None = None
     ticker: str
